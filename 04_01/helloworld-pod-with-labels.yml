@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: helloworld
+  name: helloworld-lables
   labels:
     env: production
     author: karthequian
