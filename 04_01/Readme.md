@@ -13,6 +13,11 @@
 You can add labels to pods, services and deployments either at build time or at run time. If you're adding labels at build time, you can add a label section in the metadata portion of the YAML as shown below:
 
 ```
+  labels:
+    env: production
+    author: karthequian
+    application_type: ui
+    release-version: "1.0"
 ```
 
 You can deploy the code above by using the command `kubectl create -f helloworld-pod-with-labels.yml`
@@ -20,20 +25,42 @@ You can deploy the code above by using the command `kubectl create -f helloworld
 
 ### Viewing labels
 
-You have a pod with labels. Super! But how do you see them? You can add the `--show-labels` option to your kubectl get command as shown here: `kubectl get pods --show-labels`.
+You have a pod with labels. Super! But how do you see them? You can add the `--show-labels` option to your kubectl get command as shown here:
 
 ```
+> kubectl get pod --show-labels
+NAME                  READY   STATUS    RESTARTS   AGE   LABELS
+helloworld-lables     1/1     Running   0          14s   application_type=ui,author=karthequian,env=production,release-version=1.0
+hw-84f776b79d-c488t   1/1     Running   1          75m   pod-template-hash=84f776b79d,run=hw
 ```
 
 ### Adding labels to running pods
 To add labels to a running pod, you can use the `kubectl label` command as follows: `kubectl label po/helloworld app=helloworld`. This adds the label `app` with the value `helloworld` to the pod.
 
-To update the value of a label, use the `--overwrite` flag in the command as follows: `kubectl label po/helloworld app=helloworldapp --overwrite` 
+To update the value of a label, use the `--overwrite` flag in the command as follows: `kubectl label po/helloworld-lables app=helloworldapp --overwrite` 
 
 ### Deleting a label
-To remove an existing label, just add a `-` to the end of the label key as follows: `kubectl label po/helloworld app-`. This will remove the app label from the helloworld pod.
+To remove an existing label, just add a `-` to the end of the label key as follows: `kubectl label po/helloworld-lables app-`. This will remove the app label from the helloworld pod.
 
 ```
+> kubectl get pod --show-labels
+NAME                  READY   STATUS    RESTARTS   AGE   LABELS
+helloworld-lables     1/1     Running   0          14s   application_type=ui,author=karthequian,env=production,release-version=1.0
+hw-84f776b79d-c488t   1/1     Running   1          75m   pod-template-hash=84f776b79d,run=hw
+
+> kubectl label po/helloworld-lables app=helloworldapp --overwrite
+pod/helloworld-lables labeled
+> kubectl get pod --show-labels
+NAME                  READY   STATUS    RESTARTS   AGE     LABELS
+helloworld-lables     1/1     Running   0          4m35s   app=helloworldapp,application_type=ui,author=karthequian,env=production,release-version=1.0
+hw-84f776b79d-c488t   1/1     Running   1          79m     pod-template-hash=84f776b79d,run=hw
+
+> kubectl label po/helloworld-lables app-
+pod/helloworld-lables labeled
+> kubectl get pod --show-labels
+NAME                  READY   STATUS    RESTARTS   AGE     LABELS
+helloworld-lables     1/1     Running   0          4m48s   application_type=ui,author=karthequian,env=production,release-version=1.0
+hw-84f776b79d-c488t   1/1     Running   1          80m     pod-template-hash=84f776b79d,run=hw
 ```
 
 ### Searching by labels
@@ -114,9 +141,12 @@ Finally, sometimes your label might not have a value assigned to it, but you can
 
 As a bonus, labels will also work with `kubectl get services/deployments/all --show-labels` and will return labels for your services, deployments or all objects.
 
-`kubectl get all --show-labels`
+```
+```
 
 And, you can delete pods, services or deployments by label as well! For example `kubectl delete pods -l dev-lead=karthik` will delete all pods who's dev-lead was Karthik. 
 
+```
+```
 
 To summarize, labels in Kubernetes is a powerful concept! Use the labeling feature to your advantage to build your infrastructure in an organized fashion.
