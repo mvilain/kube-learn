@@ -111,7 +111,7 @@ If we were going to recreate our deployment and service as YAMLs, they would loo
 
 Deployment:
 ```
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: helloworld-deployment
@@ -167,7 +167,7 @@ karthik$
 Typically, in the real world, you would mostly not use seperate files to break up your application and would have it in a single file that encompasses the entire application with both the deployment and the service component. An example of this YAML file is shown here:
 
 ```
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: helloworld-deployment
