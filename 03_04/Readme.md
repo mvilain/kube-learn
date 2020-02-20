@@ -14,7 +14,7 @@ To take a look at the deployment YAML that runs the application, run `kubectl ge
 
 ```
 MacbookHome:03_03 Breaking down the helloworld app karthik$ kubectl get deploy/hw -o yaml
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 kind: Deployment
 metadata:
   annotations:
@@ -26,7 +26,7 @@ metadata:
   name: hw
   namespace: default
   resourceVersion: "47852"
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/hw
+  selfLink: /apis/extensions/v1/namespaces/default/deployments/hw
   uid: aa584aea-b242-11e7-bc0d-080027606b68
 spec:
   replicas: 1
