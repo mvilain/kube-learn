@@ -14,6 +14,12 @@ Kubernetes learned from this lesson early on, and created the Kubernetes Dashboa
 
 We will also enable heapster, to see cluster memory and CPU usage. This is enabled on minikube with `minikube addons enable heapster`
 
+**2/20/20 heapster is retired https://github.com/kubernetes/minikube/issues/5017**
+
+use metrics-server:
+
+    minikube enable metrics-server
+
 The dashboard comes pre enabled as an addon. To start up the dashboard type `minikube dashboard` in your command prompt.
 
 
