@@ -1,21 +1,21 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: example-daemonset2
+  name: example-daemonset-dev
   namespace: default
   labels:
-    k8s-app: example-daemonset2
+    k8s-app: example-daemonset-dev
 spec:
   selector:
     matchLabels:
-      name: example-daemonset2
+      name: example-daemonset-dev
   template:
     metadata:
       labels:
-        name: example-daemonset2
+        name: example-daemonset-dev
     spec:
       containers:
-      - name: example-daemonset2
+      - name: example-daemonset-dev
         image: busybox
         args:
         - /bin/sh
