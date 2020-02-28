@@ -1,5 +1,7 @@
 # CoreOS install
 
+# CoreOS install
+
 - Downloaded ISO
 
 https://coreos.com/os/docs/2387.0.0/booting-with-iso.html
@@ -7,12 +9,14 @@ https://coreos.com/os/docs/latest/booting-with-iso.html
 
 - 2411 booted with "Failed to start Switch Root"; increased RAM to 2048MB
 
+```
 Type:   Other-64bit
 Memory: 2048MB
 CPU:    2 CPU
 Legacy BIOS: YES
 Shared: /Users/vilain
 sdb:    32GB
+```
 
 says it's "CoreOS 2303.4.0"
 
@@ -69,9 +73,8 @@ systemctl restart systemd-networkd
 
 - set hostname
 
-```
-hostnamectl coreos24 set-hostname coreos24
-```
+    hostnamectl set-hostname coreos24
+
 
 - mount Mac's "/" (not working)
 
@@ -79,7 +82,7 @@ https://coreos.com/os/docs/latest/mounting-storage.html
 
 in /etc/systemd/system/host.mount:
 
-.host:/  /media/hgfs fuse.vmhgfs-fuse allow_other,defaults 0 0
+    .host:/  /media/hgfs fuse.vmhgfs-fuse allow_other,defaults 0 0
 
 
 ## Cloud Config (deprecated)
@@ -166,5 +169,4 @@ coreos:
             [Unit]
             After=var-lib-docker.mount
             Requires=var-lib-docker.mount
-
 ```
