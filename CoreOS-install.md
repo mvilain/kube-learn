@@ -1,32 +1,28 @@
 # CoreOS install
 
-# CoreOS install
-
 - Downloaded ISO
 
-https://coreos.com/os/docs/2387.0.0/booting-with-iso.html
-https://coreos.com/os/docs/latest/booting-with-iso.html
+    https://coreos.com/os/docs/2387.0.0/booting-with-iso.html
+    https://coreos.com/os/docs/latest/booting-with-iso.html
 
 - 2411 booted with "Failed to start Switch Root"; increased RAM to 2048MB
 
-```
-Type:   Other-64bit
-Memory: 2048MB
-CPU:    2 CPU
-Legacy BIOS: YES
-Shared: /Users/vilain
-sdb:    32GB
-```
+    Type:   Other-64bit
+    Memory: 2048MB
+    CPU:    2 CPU
+    Legacy BIOS: YES
+    Shared: /Users/vilain
+    sdb:    32GB
 
 says it's "CoreOS 2303.4.0"
 
-https://coreos.com/os/docs/latest/installing-to-disk.html
+    https://coreos.com/os/docs/latest/installing-to-disk.html
 
 - create an ignition config yaml file (to ultimately generate a JSON file)
 
-https://coreos.com/ignition/docs/latest/examples.html
-Validate with **ct**: https://github.com/coreos/container-linux-config-transpiler
-Configuration spec: https://github.com/coreos/container-linux-config-transpiler/blob/master/doc/configuration.md
+  - https://coreos.com/ignition/docs/latest/examples.html
+  - Validate with **ct**: https://github.com/coreos/container-linux-config-transpiler
+  - Configuration spec: https://github.com/coreos/container-linux-config-transpiler/blob/master/doc/configuration.md
 
 ```
 
@@ -47,9 +43,6 @@ coreos-install -d /dev/sda -c ignition.json -o vmware_raw
 ```
 
 - reboot
-
-
-
 
 # Appendix
 
