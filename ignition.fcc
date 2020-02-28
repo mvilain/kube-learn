@@ -1,0 +1,58 @@
+variant: fcos
+version: 1.0.0
+
+# FedoraCore OS ignition config
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCZzrQD/FDCnNsTOKMRrvjZIhu+NVMeJuFiwA0YR1kCjLTvcSnroE2s+XEhaWonrZckA2Mt1ieHY+O2iWVqYFu7wwqMXlc6iJdBp4BmpjEmKJaXDb5s7SWZTWyUHseSHDQtP1MGPmGBDAms/mxhDw8OPnHA1wUt4FwnWUW4kBEBL3M0rPkXpxR6X84UdhCTvRihLHUFhSDhmqDJhPTBPuuR9GENhvSsopY0p/B+0ys5ym7U0qHQCwD8ctbf/soGPicHLYFhTDV2EnHI3wFpz9VoJ/4bOxuWDy1w2maY2Gu7S54E7jAxzXEULu//8TcfQCYYYRbnMqs28qP2CldTp+AL coreos"
+    - name: vilain
+      password_hash: "$6$rTZyy4jR$csRM9u.QjHFKv0DVJTBp.0lTtl7semjDvJ32L6ZiJ/eBbp8O8vRQe.ZNJTqsa3zqKWP82gu1Cdmp3Wn.H9vPm."
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCZzrQD/FDCnNsTOKMRrvjZIhu+NVMeJuFiwA0YR1kCjLTvcSnroE2s+XEhaWonrZckA2Mt1ieHY+O2iWVqYFu7wwqMXlc6iJdBp4BmpjEmKJaXDb5s7SWZTWyUHseSHDQtP1MGPmGBDAms/mxhDw8OPnHA1wUt4FwnWUW4kBEBL3M0rPkXpxR6X84UdhCTvRihLHUFhSDhmqDJhPTBPuuR9GENhvSsopY0p/B+0ys5ym7U0qHQCwD8ctbf/soGPicHLYFhTDV2EnHI3wFpz9VoJ/4bOxuWDy1w2maY2Gu7S54E7jAxzXEULu//8TcfQCYYYRbnMqs28qP2CldTp+AL coreos"
+      groups: [ sudo, docker ]
+
+systemd:
+  units:
+    - name: docker.service
+      enabled: true
+
+storage:
+  disks:
+    - device: /dev/sdb
+      wipe_table: true 
+      partitions:
+      - label: docker 
+        number: 1
+        size_mib: 0
+
+  filesystems: 
+    - path: /var/mnt/docker
+      device: /dev/sdb1
+      format: xfs
+      label: docker
+
+  files:
+    - path: /etc/sudoers.d/vilain
+      contents:
+        inline: "vilain ALL=(ALL) NOPASSWD: ALL"
+      mode: 0600 
+      user:
+        name: root 
+
+    - path: /etc/NetworkManager/system-connections/eth0.nmconnection
+      mode: 0600
+      overwrite: true
+      contents:
+        inline: |
+          [connection]
+          type=ethernet
+          interface-name=eth0
+        
+          [ipv4]
+          method=manual
+          addresses=192.168.1.231/24
+          gateway=192.168.1.254
+          dns=8.8.8.8;8.8.4.4
