@@ -37,6 +37,8 @@ says it's "CoreOS 2303.4.0"
 ct < ignition.yaml 
 # ensure no errors, then output to file
 ct < ignition.yaml > ignition.json  # no errors? output to file
+# run mini http server with python
+python -m SimpleHTTPServer 8000
 
 #on the CoreOS live image, 
 coreos-install -d /dev/sda -c ignition.json -o vmware_raw
