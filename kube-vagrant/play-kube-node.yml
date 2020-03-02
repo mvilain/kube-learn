@@ -1,0 +1,11 @@
+---
+# setup a new kubernetes node
+- include_tasks play-kube-common.yml
+
+# master node creates join command here
+#
+  - name: Copy the join command to server location
+    copy: src=join-command dest=/tmp/join-command.sh mode=0777
+
+  - name: Join the node to cluster
+    command: sh /tmp/join-command.sh
