@@ -74,6 +74,7 @@ This folder includes all of the different pieces of information you'll need to t
 - **Get started with Kops:** https://cloudacademy.com/blog/kubernetes-operations-with-kops/
 
 - **Azure container service:** https://docs.microsoft.com/en-us/azure/container-service/kubernetes/container-service-kubernetes-walkthrough
+
 - **Oracle Container Engine:** https://blogs.oracle.com/developers/announcing-oracle-container-engine-and-oracle-container-registry-service
 
 
