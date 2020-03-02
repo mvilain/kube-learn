@@ -26,15 +26,18 @@ EOF
 
 Vagrant.configure("2") do |config|
   config.vm.define "kube" do |kube|
+    kube.vm.synced_folder '.', '/vagrant', disabled: true
     kube.vm.provider "virtualbox" do |v|
       v.cpus = 2
       v.memory = 2048
+#      v.check_guest_additions = false
+#      v.functional_vboxsf = false
     end
-#     kube.vm.network "public_network", bridge: "en1: Ethernet 2", ip: "192.168.50.10"
-#     kube.vm.network "forwarded_port", guest: 80, host: 8000, auto_correct: true
-#     kube.vm.network "forwarded_port", guest: 8088, host: 8088, auto_correct: true
+#    kube.vm.network "public_network", bridge: "en1: Ethernet 2", ip: "192.168.50.10"
+#    kube.vm.network "forwarded_port", guest: 80, host: 8000, auto_correct: true
+#    kube.vm.network "forwarded_port", guest: 8088, host: 8088, auto_correct: true
     kube.vm.hostname = "kube.local"
-    kube.vm.box = "ubuntu/trusty64"
+    kube.vm.box = "ubuntu/trusty64" #ubuntu/trusty64 amam/flatcar-alpha amam/coreos-alpha
     kube.vm.provision "shell", inline: APT_SETUP
   end
 end
