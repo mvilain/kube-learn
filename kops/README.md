@@ -12,7 +12,7 @@ Is there a comparison page listing when and why should I use each method?
 
 Installing with kubeadm http://kubernetes.io/docs/getting-started-guides/kubeadm/
 installing with kops http://kubernetes.io/docs/getting-started-guides/kops/
-installing on aws http://kubernetes.io/docs/getting-started-guides/aws/
+installing on aws https://kubernetes.io/docs/setup/production-environment/turnkey/aws/
 
 ---
 Justin Garrison 	
