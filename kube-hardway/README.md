@@ -2,6 +2,8 @@
 
 Notes from Kelsey Hightower's blog 
 
+AWS us-east-2 CoreOS AMI  ami-08c51fc1b1cc85501
+
 https://github.com/kelseyhightower/kubernetes-the-hard-way/
 
 gcloud config configurations create hard-way --activate
