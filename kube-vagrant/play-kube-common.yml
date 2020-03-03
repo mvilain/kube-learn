@@ -1,11 +1,11 @@
 ---
 # setup a new kubernetes master or worker node
-- include_tasks play-kube-common.yml
 
 - hosts: all
   become: true
   tasks:
-  - name: Install packages that allow apt to be used over HTTPS
+
+  - name: COM-Install packages that allow apt to be used over HTTPS
     apt:
       name: "{{ packages }}"
       state: present
@@ -18,17 +18,17 @@
       - gnupg-agent
       - software-properties-common
 
-  - name: Add an apt signing key for Docker
+  - name: COM-Add an apt signing key for Docker
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
 
-  - name: Add apt repository for stable version
+  - name: COM-Add apt repository for stable version
     apt_repository:
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
       state: present
 
-  - name: Install docker and its dependecies
+  - name: COM-Install docker and its dependecies
     apt: 
       name: "{{ packages }}"
       state: present
@@ -41,13 +41,13 @@
     notify:
       - docker status
 
-  - name: Add vagrant user to docker group
+  - name: COM-Add vagrant user to docker group
     user:
       name: vagrant
       group: docker
 
 
-  - name: Remove swapfile from /etc/fstab
+  - name: COM-Remove swapfile from /etc/fstab
     mount:
       name: "{{ item }}"
       fstype: swap
@@ -56,6 +56,6 @@
       - swap
       - none
 
-  - name: Disable swap
+  - name: COM-Disable swap
     command: swapoff -a
     when: ansible_swaptotal_mb > 0

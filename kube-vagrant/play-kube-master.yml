@@ -1,20 +1,81 @@
 ---
-# setup a new kubernetes master or worker node
-- include_tasks play-kube-common.yml
+
+- hosts: all
+  become: true
+  tasks:
+
+#################################################################
+#  setup a new kubernetes master or worker node
+
+  - name: COM.1-Install packages that allow apt to be used over HTTPS
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+
+  - name: COM.2-Add an apt signing key for Docker
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: COM.3-Add apt repository for stable version
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      state: present
+
+  - name: COM.4-Install docker and its dependecies
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    notify:
+      - docker status
+
+  - name: COM.5-Add vagrant user to docker group
+    user:
+      name: vagrant
+      group: docker
 
 
-  - name: Add an apt signing key for Kubernetes
+  - name: COM.6-Remove swapfile from /etc/fstab
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+      - swap
+      - none
+
+  - name: COM.7-Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+
+#################################################################
+
+  - name: MAS.1-Add an apt signing key for Kubernetes
     apt_key:
       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
       state: present
 
-  - name: Adding apt repository for Kubernetes
+  - name: MAS.2-Adding apt repository for Kubernetes
     apt_repository:
       repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
       state: present
       filename: kubernetes.list
 
-  - name: Install Kubernetes binaries
+  - name: MAS.3-Install Kubernetes binaries
     apt: 
       name: "{{ packages }}"
       state: present
@@ -25,43 +86,64 @@
         - kubeadm 
         - kubectl
 
-# node_ip passed on the command line
-  - name: Configure node ip
+  - name: MAS.4-setup .kube/ for vagrant user
+    file:
+      path: /etc/default/kubelet
+      owner: root
+      group: root
+      state: touch
+
+  # node_ip passed on the command line
+  - name: MAS.5-Configure node ip
     lineinfile:
       path: /etc/default/kubelet
-      line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+      line: KUBELET_EXTRA_ARGS=--node-ip="{{ node_ip }}"
 
-  - name: Restart kubelet
+  - name: MAS.6-Restart kubelet
     service:
       name: kubelet
       daemon_reload: yes
       state: restarted
 
-  - name: Initialize the Kubernetes cluster using kubeadm
-    command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10"  --node-name k8s-master --pod-network-cidr=192.168.0.0/16
+  - name: MAS.7-Initialize the Kubernetes cluster using kubeadm (this will take a moment)
+    command: kubeadm init 
+        --apiserver-advertise-address="192.168.50.10" 
+        --apiserver-cert-extra-sans="192.168.50.10"  
+        --node-name k8s-master 
+        --pod-network-cidr=192.168.0.0/16
+    args:
+      creates: /etc/kubernetes/manifests/kube-apiserver.yaml
 
+  - name: MAS.8-setup .kube/ for vagrant user
+    file:
+      path: /home/vagrant/.kube
+      state: directory
+      recurse: yes
+      owner: vagrant
+      group: vagrant
 
-- name: Setup kubeconfig for vagrant user
-    command: "{{ item }}"
-    with_items:
-     - mkdir -p /home/vagrant/.kube
-     - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-     - chown vagrant:vagrant /home/vagrant/.kube/config
+  - name: MAS.9-copy admin.conf to .kube/config
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/vagrant/.kube/config
+      remote_src: yes
+      owner: vagrant
+      group: vagrant
 
+# https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+  - name: MAS.10-fetching calico config
+    copy: 
+      src: calico.yaml
+      dest: calico.yaml
 
-  - name: Install calico pod network
+  - name: MAS.10-Install calico pod network
     become: false
-    command: kubectl create -f https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+    command: kubectl create -f calico.yaml
 
 
-  - name: Generate join command
+  - name: MAS.11-Generate join command
     command: kubeadm token create --print-join-command
     register: join_command
 
-  - name: Copy join command to local file
+  - name: MAS.12-Copy join command to local file
     local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
-
-
-handlers:
-    - name: docker status
-      service: name=docker state=started
