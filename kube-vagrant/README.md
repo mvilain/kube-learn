@@ -9,4 +9,7 @@ https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant
 - workers are IP 192.168.50.{10+#} where # is 1..x
 
 - calico pod v3.4
+
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
 - docker (latest) xenial

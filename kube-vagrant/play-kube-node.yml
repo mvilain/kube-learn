@@ -18,6 +18,8 @@
       - curl
       - gnupg-agent
       - software-properties-common
+    register: mas_com_1
+#  - debug: var=mas_com_1.stdout_lines
 
   - name: COM.2-Add an apt signing key for Docker
     apt_key:
@@ -33,7 +35,6 @@
     apt: 
       name: "{{ packages }}"
       state: present
-      update_cache: yes
     vars:
       packages:
       - docker-ce 
@@ -41,23 +42,48 @@
       - containerd.io
     notify:
       - docker status
+    register: mas_com_4
+  - debug: var=mas_com_4.stdout_lines
 
-  - name: COM.5-Add vagrant user to docker group
+  # https://github.com/kubernetes/kubeadm/issues/1394
+  - name: COM.5-set docker to use systemd driver
+    copy: 
+      dest: /etc/docker/daemon.json
+      content: |
+        # THIS FILE IS CONTROLLED BY ANSIBLE - DO NOT CHANGE IN DEPLOYMENT!
+        # Setup daemon.
+        {
+          "exec-opts": ["native.cgroupdriver=systemd"],
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "100m"
+          },
+          "storage-driver": "overlay2"
+        }
+      owner: root
+      group: root
+      mode: "0644"
+    notify:
+      - docker status
+    register: mas_com_5
+#  - debug: var=mas_com_5
+
+  - name: COM.6-Add vagrant user to docker group
     user:
       name: vagrant
       group: docker
 
 
-  - name: COM.6-Remove swapfile from /etc/fstab
+  - name: COM.7-Remove swapfile from /etc/fstab
     mount:
       name: "{{ item }}"
       fstype: swap
       state: absent
     with_items:
       - swap
-      - none
+#      - none
 
-  - name: COM.7-Disable swap
+  - name: COM.8-Disable swap
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
 
@@ -80,11 +106,13 @@
     apt: 
       name: "{{ packages }}"
       state: present
-      update_cache: yes
+#      update_cache: yes
     vars:
       packages:
         - kubeadm 
         - kubectl
+    register: node_3
+  - debug: var=node_3.stdout_lines
 
   - name: NODE.4-Copy the join command to server location
     copy: 
@@ -94,6 +122,9 @@
 
   - name: NOD.5-Join the node to cluster
     command: sh /tmp/join-command.sh
+    register: node_5
+  - debug: var=node_5.stdout_lines
+
 
   handlers:
   - name: docker status
