@@ -10,6 +10,8 @@ https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant
 
 - calico pod v3.4
 
-https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
+The 
+[https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml](calico config file) is out of date and uses API versions that don't match kubernetes V 1.7.3.  The included calico.yaml file provided fixes that.
 
 - docker (latest) xenial

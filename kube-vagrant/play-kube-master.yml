@@ -114,7 +114,7 @@
     register: mas_3
   - debug: var=mas_3.stdout_lines
 
-  - name: MAS.4-setup .kube/ for vagrant user
+  - name: MAS.4-setup kubelet for extra args
     file:
       path: /etc/default/kubelet
       owner: root
@@ -160,23 +160,35 @@
       owner: vagrant
       group: vagrant
 
-# https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
-  - name: MAS.10-fetching calico config
+  - name: MAS.10-copy certs to local repo
+    fetch:
+      src: "/etc/kubernetes/pki/{{ item }}"
+      dest: "{{ item }}"
+      flat: yes
+    with_items:
+      - ca.crt
+      - apiserver-kubelet-client.crt
+      - apiserver-kubelet-client.key
+
+  - name: MAS.11-fetching calico config
     copy: 
       src: calico.yaml
       dest: calico.yaml
 
-  - name: MAS.10-Install calico pod network
+  - name: MAS.12-Install calico pod network
     become: false
     command: kubectl create -f calico.yaml
 
 
-  - name: MAS.11-Generate join command
+  - name: MAS.13-Generate join command
     command: kubeadm token create --print-join-command
     register: join_command
 
-  - name: MAS.12-Copy join command to local file
-    local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+  - name: MAS.14-Copy join command to local file
+    local_action: copy 
+      content="{{ join_command.stdout_lines[0] }}"
+      dest="./join-command"
+
 
   handlers:
   - name: docker status
