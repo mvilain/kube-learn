@@ -1,4 +1,4 @@
 .vagrant
 join-command
-ca.crt
+ca.*
 apiserver-kubelet-client*
