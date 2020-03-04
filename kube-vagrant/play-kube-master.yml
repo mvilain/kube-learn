@@ -26,11 +26,15 @@
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
+    register: mas_com_2
+#  - debug: var=mas_com_2.stdout_lines
 
   - name: COM.3-Add apt repository for stable version
     apt_repository:
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
       state: present
+    register: mas_com_3
+#  - debug: var=mas_com_3.stdout_lines
 
   - name: COM.4-Install docker and its dependecies
     apt: 
@@ -46,7 +50,7 @@
     register: mas_com_4
   - debug: var=mas_com_4.stdout_lines
 
-# https://github.com/kubernetes/kubeadm/issues/1394
+  # https://github.com/kubernetes/kubeadm/issues/1394
   - name: COM.5-set docker to use systemd driver
     copy: 
       dest: /etc/docker/daemon.json
@@ -73,6 +77,8 @@
     user:
       name: vagrant
       group: docker
+    register: mas_com_6
+#  - debug: var=mas_com_6.stdout_lines
 
 
   - name: COM.7-Remove swapfile from /etc/fstab
@@ -83,10 +89,24 @@
     with_items:
       - swap
 #      - none
+    register: mas_com_7
+#  - debug: var=mas_com_7.stdout_lines
 
   - name: COM.8-Disable swap
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
+    register: mas_com_8
+#  - debug: var=mas_com_8.stdout_lines
+
+  - name: COM.9-Create calico directory for node stats
+    file:
+      name: /var/lib/calico/nodename
+      state: directory
+      recurse: true
+      owner: root
+      group: root
+    register: mas_com_9
+#  - debug: var=mas_com_9.stdout_lines
 
 #################################################################
 
@@ -178,7 +198,6 @@
   - name: MAS.12-Install calico pod network
     become: false
     command: kubectl create -f calico.yaml
-
 
   - name: MAS.13-Generate join command
     command: kubeadm token create --print-join-command

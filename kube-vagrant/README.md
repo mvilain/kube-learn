@@ -15,3 +15,7 @@ The
 [https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml](calico config file) is out of date and uses API versions that don't match kubernetes V 1.7.3.  The included calico.yaml file provided fixes that.
 
 - docker (latest) xenial
+
+## TO DO
+
+- Doesn't have container volume plugin. Can't run pods that requests storage.
