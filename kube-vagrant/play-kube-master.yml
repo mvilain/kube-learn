@@ -7,6 +7,11 @@
 #################################################################
 #  setup a new kubernetes master or worker node
 
+  - assert:
+      that:
+        - node_ip is defined
+      msg: node_ip must be defined in calling this playbook
+
   - name: COM.1-Install packages that allow apt to be used over HTTPS
     apt:
       name: "{{ packages }}"
@@ -98,15 +103,24 @@
     register: mas_com_8
 #  - debug: var=mas_com_8.stdout_lines
 
-  - name: COM.9-Create calico directory for node stats
+  - name: COM.9-Create calico nodename for node stats
     file:
-      name: /var/lib/calico/nodename
+      name: /var/lib/calico
       state: directory
-      recurse: true
+      recurse: yes
       owner: root
       group: root
     register: mas_com_9
-#  - debug: var=mas_com_9.stdout_lines
+#  - debug: var=mas_com_9
+
+  - name: COM.10-Create calico nodename for node stats
+    file:
+      name: /var/lib/calico/nodename
+      state: touch
+      owner: root
+      group: root
+    register: mas_com_10
+  - debug: var=mas_com_10
 
 #################################################################
 

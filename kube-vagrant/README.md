@@ -19,3 +19,4 @@ The
 ## TO DO
 
 - Doesn't have container volume plugin. Can't run pods that requests storage.
+- ran a daemonset and pods are created but don't run CNI fails to run "hostname"
