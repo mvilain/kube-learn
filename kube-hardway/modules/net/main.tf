@@ -63,6 +63,7 @@ resource "aws_nat_gateway" "priv" {
 
   tags = {
     Name        = "gw NAT"
+    "Terraform" = "true"
   }
 }
 
@@ -77,7 +78,9 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name       = "k8s-pubnet"
+    Name        = "k8s-pubnet"
+    "Terraform" = "true"
+
   }
 }
 

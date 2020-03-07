@@ -47,7 +47,6 @@ resource "aws_autoscaling_group" "k8s" {
       id               = aws_launch_template.k8-master.id
       version          = "$Latest"
   }
-#  launch_configuration = aws_launch_configuration.web.id
 
   tag {
     key                 = "Terraform"
@@ -56,28 +55,12 @@ resource "aws_autoscaling_group" "k8s" {
   }
   tag {
     key                 = "Name"
-    value               = "${var.env_name}-ks8"
+    value               = "${var.env_name}-ks8-master"
     propagate_at_launch = true
   }
 }
 
-// ================================================== ELB -> ASG
-
-#resource "aws_autoscaling_attachment" "asg_att" {
-#  autoscaling_group_name = aws_autoscaling_group.k8s.id
-#  elb                    = aws_elb.web.id
-#}
-
-#resource "aws_launch_configuration" "web" {
-#  name                    = "${var.env_name}-k8s-lc"
-#  image_id                = var.ami
-#  instance_type           = var.type
-#  security_groups         = [ var.sg_ids ]
-#
-#  root_block_device {
-#    delete_on_termination = true
-#  }
-#}
+// ================================================== LT -> ELB
 
 resource "aws_launch_template" "k8-master" {
   name                                 = "${var.env_name}-k8s-lt"
