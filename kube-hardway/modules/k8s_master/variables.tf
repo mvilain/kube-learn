@@ -4,6 +4,7 @@
 # variable "az"
 # variable "subnet_ids"
 # variable "sg_ids"
+# variable "keypair_name"
 # variable "ami"
 # variable "type"
 # variable "desired_capacity"
@@ -27,7 +28,12 @@ variable "subnet_ids" {
 }
 
 variable "sg_ids" {
-  description = "security groups for web_server"
+  description = "security groups for kubernetes master"
+  type        = string
+}
+
+variable "keypair_name" {
+  description = "keypair name for for kubernetes master"
   type        = string
 }
 

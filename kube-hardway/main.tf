@@ -4,6 +4,16 @@ variable "K8S_REGION" {
   description = "AWS region to use for Kubernetes cluster"
 }
 
+variable "K8S_KEYNAME" {
+  type        = string
+  description = "ssh public key name for Kubernetes cluster"
+}
+
+variable "K8S_KEY" {
+  type        = string
+  description = "ssh public key for Kubernetes cluster"
+}
+
 variable "K8S_BUCKET" {
   type        = string
   description = "AWS S3 Bucket to store Terraform state for Kubernetes cluster"
@@ -83,12 +93,18 @@ provider "aws" {
 #  }
 #}
 
+# set the key for k8s
+resource "aws_key_pair" "k8s" {
+  key_name   = var.K8S_KEYNAME
+  public_key = var.K8S_KEY
+}
+
 // ================================================== NETWORK + SUBNETS
 module "net_setup" {
   source = "./modules/net"
 
   #inputs:
-  env_name     = "k8s"
+  env_name     = "prod"
   region       = var.K8S_REGION
   vpc_cidr     = var.K8S_VPC_CIDR
   pubnet_name  = var.PUBNET_NAME
@@ -113,14 +129,16 @@ module "net_setup" {
 }
 
 // ================================================== k8s master
+
 module "k8s_master" {
   source = "./modules/k8s_master"
 
   #inputs:
-  env_name         = "k8s"
+  env_name         = "prod"
   az               = module.net_setup.availability_zones
   subnet_ids       = module.net_setup.subnet_ids
   sg_ids           = module.net_setup.net_sg_id
+  keypair_name     = var.K8S_KEYNAME
   ami              = var.K8S_AMI
   type             = var.K8S_TYPE
   desired_capacity = 3

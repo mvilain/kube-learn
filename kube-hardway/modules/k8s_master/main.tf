@@ -4,6 +4,7 @@
 # variable "az"
 # variable "subnet_ids"
 # variable "sg_ids"
+# variable "keypair_name"
 # variable "ami"
 # variable "type"
 # variable "desired_capacity"
@@ -14,7 +15,7 @@
 resource "aws_elb" "web" {
   name               = "${var.env_name}-web-lb"
   security_groups    = [ var.sg_ids ]
-  subnets            = [ var.subnet_ids[0], var.subnet_ids[1] ]
+  subnets            = [ var.subnet_ids[0] ]
 
   listener {
     instance_port     = 80
@@ -33,16 +34,20 @@ resource "aws_elb" "web" {
 #}
 
 // ================================================== AUTOSCALING
-resource "aws_autoscaling_group" "web" {
-  name                 = "${var.env_name}-web-asg"
+
+resource "aws_autoscaling_group" "k8s" {
+  name                 = "${var.env_name}-k8s-asg"
   desired_capacity     = var.desired_capacity
   health_check_type    = "ELB"
-  launch_configuration = aws_launch_configuration.web.id
   max_size             = var.max_size
   min_size             = var.min_size
-#   availability_zones   = var.az.*
-  vpc_zone_identifier  = var.subnet_ids.*
-#  load_balancers       = [ aws_elb.prod_web.id ]
+  vpc_zone_identifier  = [ var.subnet_ids[0] ]
+
+  launch_template {
+      id               = aws_launch_template.k8-master.id
+      version          = "$Latest"
+  }
+#  launch_configuration = aws_launch_configuration.web.id
 
   tag {
     key                 = "Terraform"
@@ -51,24 +56,81 @@ resource "aws_autoscaling_group" "web" {
   }
   tag {
     key                 = "Name"
-    value               = "${var.env_name}-web"
+    value               = "${var.env_name}-ks8"
     propagate_at_launch = true
   }
 }
 
 // ================================================== ELB -> ASG
-resource "aws_autoscaling_attachment" "asg_att" {
-  autoscaling_group_name = aws_autoscaling_group.web.id
-  elb                    = aws_elb.web.id
-}
 
-resource "aws_launch_configuration" "web" {
-  name              = "${var.env_name}-web-lc"
-  image_id          = var.ami
-  instance_type     = var.type
-  security_groups = [ var.sg_ids ]
+#resource "aws_autoscaling_attachment" "asg_att" {
+#  autoscaling_group_name = aws_autoscaling_group.k8s.id
+#  elb                    = aws_elb.web.id
+#}
 
-  root_block_device {
-    delete_on_termination = true
+#resource "aws_launch_configuration" "web" {
+#  name                    = "${var.env_name}-k8s-lc"
+#  image_id                = var.ami
+#  instance_type           = var.type
+#  security_groups         = [ var.sg_ids ]
+#
+#  root_block_device {
+#    delete_on_termination = true
+#  }
+#}
+
+resource "aws_launch_template" "k8-master" {
+  name                                 = "${var.env_name}-k8s-lt"
+  description                          = "k8s master"
+  disable_api_termination               = false
+#  ebs_optimized                         = true
+  instance_initiated_shutdown_behavior  = "terminate"
+  image_id                              = var.ami
+  instance_type                         = var.type
+  key_name                              = var.keypair_name
+  vpc_security_group_ids                = [ var.sg_ids ]
+
+  block_device_mappings {
+    device_name                         = "/dev/sda1"
+    ebs { 
+      volume_size                       = 20 
+    }
   }
+#  cpu_options {
+#    core_count                          = 1
+#    threads_per_core                    = 2
+#  }
+#  credit_specification { 
+#    cpu_credits                         = "standard" 
+#  }
+
+  instance_market_options { 
+    market_type                         = "spot"
+    spot_options {
+      instance_interruption_behavior    = "terminate"
+    }
+  }
+
+  monitoring { 
+    enabled                             = true
+  }
+
+#  network_interfaces { 
+#    associate_public_ip_address         = true 
+#    security_groups                     = [ var.sg_ids ]
+#    subnet_id                           = var.subnet_ids[0]
+#  }
+#  placement {
+#    availability_zone                   = "us-west-2a"
+#  }
+
+  tag_specifications {
+    resource_type                       = "instance"
+
+    tags = {
+      Name                              = "${var.env_name}-k8s-master"
+      "Terraform"                       = "true"
+    }
+  }
+
 }

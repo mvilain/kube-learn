@@ -34,12 +34,12 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_subnet" "private" {
-  vpc_id     = aws_vpc.k8s.id
-  cidr_block = var.privnet_cidr
+  vpc_id            = aws_vpc.k8s.id
+  cidr_block        = var.privnet_cidr
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    Name = var.privnet_name
+    Name            = var.privnet_name
   }
 }
 
@@ -55,10 +55,6 @@ data "aws_subnet_ids" "k8s" {
 
 resource "aws_eip" "k8s" {
   vpc = true
-
-#   instance                  = "${aws_instance.foo.id}"
-#   associate_with_private_ip   = "10.0.0.12"
-#   depends_on                  = ["aws_nat_gateway.priv"]
 }
 
 resource "aws_nat_gateway" "priv" {
@@ -66,39 +62,108 @@ resource "aws_nat_gateway" "priv" {
   subnet_id     = aws_subnet.private.id
 
   tags = {
-    Name = "gw NAT"
+    Name        = "gw NAT"
   }
 }
 
-// ================================================== ROUTES
+// ================================================== ROUTES + ASSOCIATIONS
 
-resource "aws_route_table" "pubnet" {
-  vpc_id = aws_vpc.k8s.id
+resource "aws_route_table" "public" {
+  vpc_id       = aws_vpc.k8s.id
 
   route {
-    cidr_block = var.pubnet_cidr
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = {
-    Name = "k8s-pubnet"
+    Name       = "k8s-pubnet"
   }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
 }
 
 // ================================================== SECURITY GROUPS
 
 resource "aws_security_group" "net_sg" {
-  name  = "${var.env_name}_sg"
-  description = "Allow http+https ports inbound, all outbound"
+  name        = "${var.env_name}_sg"
+  description = "Allow ssh,icmp,https inbound, all outbound"
   vpc_id      = aws_vpc.k8s.id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    description = "LA POP"
-    cidr_blocks = var.whitelist
+    description = "LA POP 66"
+    cidr_blocks = [ "66.212.16.0/20" ]
   }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 67-208"
+    cidr_blocks = [ "67.215.208.0/20" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 67-224"
+    cidr_blocks = [ "67.215.224.0/19" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 69"
+    cidr_blocks = [ "69.12.64.0/19" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 96"
+    cidr_blocks = [ "96.44.128.0/18" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 97"
+    cidr_blocks = [ "97.0.0.0/10" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "LA POP 173"
+    cidr_blocks = [ "173.254.192.0/18" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "SEA POP 199"
+    cidr_blocks = [ "199.229.250.0/24" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "SF POP 206"
+    cidr_blocks = [ "206.189.0.0/16" ]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "uVerse"
+    cidr_blocks = [ "75.24.0.0/13" ]
+  }
+
 
 # ping ICPM doesn't have a port
 #https://blog.jwr.io/terraform/icmp/ping/security/groups/2018/02/02/terraform-icmp-rules.html
@@ -124,8 +189,8 @@ resource "aws_security_group" "net_sg" {
   }
 
   tags = {
-    "Terraform" : "true"
     "Name"      : "${var.env_name}-sg"
+    "Terraform" : "true"
   }
 }
 
@@ -134,7 +199,8 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.k8s.id
 
   tags = {
-    Name = "k8s-pub-igw"
+    Name        = "k8s-pub-igw"
+    "Terraform" = "true"
   }
 }
 
