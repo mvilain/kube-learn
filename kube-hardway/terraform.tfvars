@@ -7,8 +7,8 @@ K8S_KEY                  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcWhXXCtJOr1AM
 K8S_BUCKET               = "mvilain-prod-tf-backend"
 K8S_DYNAMODB_TABLE       = "mvilain-prod-tf-locks"
 
-# CentOS 7 in us-east-2
-K8S_AMI                  = "ami-77724e12"
+# Ubuntu-18.04LTS in us-east-2
+K8S_AMI                  = "ami-0fc20dd1da406780b"
 K8S_TYPE                 = "t2.micro"
 
 K8S_VPC_CIDR             = "10.10.0.0/16"
