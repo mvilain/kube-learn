@@ -2,7 +2,8 @@
 
 Notes from Kelsey Hightower's blog 
 
-AWS us-east-2 CoreOS AMI  ami-08c51fc1b1cc85501
+AWS us-east-2 CoreOS AMI       ami-08c51fc1b1cc85501
+AWS us-east-2 Ubuntu 18.04 AMI ami-0fc20dd1da406780b
 
 https://github.com/kelseyhightower/kubernetes-the-hard-way/
 
@@ -62,3 +63,7 @@ done
 gcloud compute instances list
 
 gcloud compute ssh controller-0
+
+## login into servers 
+
+ssh -i "./k8s-key.pem" centos@<IP-ADDRESS>
