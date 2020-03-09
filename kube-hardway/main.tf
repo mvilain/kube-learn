@@ -41,24 +41,36 @@ variable "K8S_VPC_CIDR" {
   default     = "10.10.0.0/16"
 }
 
-variable "PUBNET_NAME" {
+variable "ZONE0_NAME" {
   type        = string
   description = "VPC public subnet name"
   default     = "k8s_pubnet"
 }
-variable "PUBNET_CIDR" {
+variable "ZONE0_CIDR" {
   type        = string
   description = "VPC public subnet CIDR block"
   default     = "10.10.10.0/24"
 }
-variable "PRIVNET_NAME" {
+
+variable "ZONE1_NAME" {
   type        = string
-  description = "VPC private subnet name"
+  description = "VPC ZONE1 subnet name"
   default     = "k8s_privnet"
 }
-variable "PRIVNET_CIDR" {
+variable "ZONE1_CIDR" {
   type        = string
-  description = "VPC private subnet CIDR block"
+  description = "VPC ZONE1 subnet CIDR block"
+  default     = "10.10.20.0/24"
+}
+
+variable "ZONE2_NAME" {
+  type        = string
+  description = "VPC ZONE2 subnet name"
+  default     = "k8s_privnet"
+}
+variable "ZONE2_CIDR" {
+  type        = string
+  description = "VPC ZONE2 subnet CIDR block"
   default     = "10.10.20.0/24"
 }
 
@@ -107,12 +119,14 @@ module "net_setup" {
   env_name     = "prod"
   region       = var.K8S_REGION
   vpc_cidr     = var.K8S_VPC_CIDR
-  pubnet_name  = var.PUBNET_NAME
-  pubnet_cidr  = var.PUBNET_CIDR
-  privnet_name = var.PRIVNET_NAME
-  privnet_cidr = var.PRIVNET_CIDR
+  zone0_name   = var.ZONE0_NAME
+  zone0_cidr   = var.ZONE0_CIDR
+  zone1_name   = var.ZONE1_NAME
+  zone1_cidr   = var.ZONE1_CIDR
+  zone2_name   = var.ZONE2_NAME
+  zone2_cidr   = var.ZONE2_CIDR
   whitelist    = var.k8s_whitelist
- 
+
 #   output "net_sg_id" {
 #     value = aws_security_group.net_sg.id
 #   }

@@ -7,14 +7,18 @@ K8S_KEY                  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcWhXXCtJOr1AM
 K8S_BUCKET               = "mvilain-prod-tf-backend"
 K8S_DYNAMODB_TABLE       = "mvilain-prod-tf-locks"
 
-# Ubuntu-18.04LTS in us-east-2
-K8S_AMI                  = "ami-0fc20dd1da406780b"
+# minimal Ubuntu-18.04LTS in us-east-2
+K8S_AMI                  = "ami-00d8df526eb10626b" 
+## Ubuntu-18.04LTS in us-east-2
+#K8S_AMI                  = "ami-0b51ab7c28f4bf5a6"
 K8S_TYPE                 = "t2.micro"
 
 K8S_VPC_CIDR             = "10.10.0.0/16"
-PUBNET_NAME              = "k8s_pubnet"
-PUBNET_CIDR              = "10.10.10.0/24"
-PRIVNET_NAME             = "k8s_privnet"
-PRIVNET_CIDR             = "10.10.20.0/24"
+ZONE0_NAME              = "k8s_zone0"
+ZONE0_CIDR              = "10.10.10.0/24"
+ZONE1_NAME             = "k8s_zone1"
+ZONE1_CIDR             = "10.10.20.0/24"
+ZONE2_NAME             = "k8s_zone2"
+ZONE2_CIDR             = "10.10.30.0/24"
 
 k8s_whitelist            = [ "0.0.0.0/0" ]

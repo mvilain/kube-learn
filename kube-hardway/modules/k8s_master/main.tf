@@ -15,7 +15,7 @@
 resource "aws_elb" "web" {
   name               = "${var.env_name}-web-lb"
   security_groups    = [ var.sg_ids ]
-  subnets            = [ var.subnet_ids[0] ]
+  subnets            = var.subnet_ids
 
   listener {
     instance_port     = 80
@@ -34,14 +34,14 @@ resource "aws_elb" "web" {
 #}
 
 // ================================================== AUTOSCALING
-
+# https://github.com/cloudposse/terraform-aws-ec2-autoscale-group
 resource "aws_autoscaling_group" "k8s" {
   name                 = "${var.env_name}-k8s-asg"
   desired_capacity     = var.desired_capacity
   health_check_type    = "ELB"
   max_size             = var.max_size
   min_size             = var.min_size
-  vpc_zone_identifier  = [ var.subnet_ids[0] ]
+  vpc_zone_identifier  = [ var.subnet_ids[1] ]
 
   launch_template {
       id               = aws_launch_template.k8-master.id
@@ -61,7 +61,6 @@ resource "aws_autoscaling_group" "k8s" {
 }
 
 // ================================================== LT -> ELB
-
 resource "aws_launch_template" "k8-master" {
   name                                 = "${var.env_name}-k8s-lt"
   description                          = "k8s master"

@@ -3,10 +3,12 @@
 # variable "env_name"
 # variable "region"
 # variable "vpc_cidr"
-# variable "pubnet_name"
-# variable "pubnet_cidr"
-# variable "privnet_name"
-# variable "privnet_cidr"
+# variable "zone0_name"
+# variable "zone0_cidr"
+# variable "zone1_name"
+# variable "zone1_cidr"
+# variable "zone2_name"
+# variable "zone2_cidr"
 # variable "whitelist"
 
 
@@ -27,23 +29,34 @@ variable "vpc_cidr" {
   description = "CIDR for the VPC"
 }
 
-variable "pubnet_name" {
+variable "zone0_name" {
   type        = string
-  description = "name to use for public subnet"
+  description = "name to use for zone0 subnet"
 }
 
-variable "pubnet_cidr" {
+variable "zone0_cidr" {
   type        = string
-  description = "CIDR for public subnet"
+  description = "CIDR for zone0 subnet"
 }
 
-variable "privnet_name" {
+variable "zone1_name" {
   type        = string
-  description = "name to use for private subnet"
+  description = "name to use for zone1 subnet"
 }
-variable "privnet_cidr" {
+
+variable "zone1_cidr" {
   type        = string
-  description = "CIDR for private subnet"
+  description = "CIDR for zone1 subnet"
+}
+
+variable "zone2_name" {
+  type        = string
+  description = "name to use for zone2 subnet"
+}
+
+variable "zone2_cidr" {
+  type        = string
+  description = "CIDR for zone2 subnet"
 }
 
 variable "whitelist" {

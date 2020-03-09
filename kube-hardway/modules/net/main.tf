@@ -3,16 +3,18 @@
 # variable "env_name"
 # variable "region"
 # variable "vpc_cidr"
-# variable "pubnet_name"
-# variable "pubnet_cidr"
-# variable "privnet_name"
-# variable "privnet_cidr"
+# variable "zone0_name"
+# variable "zone0_cidr"
+# variable "zone1_name"
+# variable "zone1_cidr"
+# variable "zone2_name"
+# variable "zone2_cidr"
 # variable "whitelist"
 
-// ================================================== NETWORK + SUBNETS
-
+// ================================================== VPC + SUBNETS
 resource "aws_vpc" "k8s" {
-  cidr_block = var.vpc_cidr
+  cidr_block           = var.vpc_cidr
+  enable_dns_hostnames = true
 }
 
 data "aws_availability_zones" "available" {
@@ -21,55 +23,76 @@ data "aws_availability_zones" "available" {
 # data.aws_availability_zones.available.names is lists region's availability zones
 # data.aws_availability_zones.available.zone_ids is lists region's availability zone ids
 
-resource "aws_subnet" "public" {
+resource "aws_subnet" "zone0" {
   vpc_id                  = aws_vpc.k8s.id
-  cidr_block              = var.pubnet_cidr
+  cidr_block              = var.zone0_cidr
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
 
   tags = {
-    Name                  = var.pubnet_name
+    Name                  = var.zone0_name
   }
+
   depends_on = [ aws_internet_gateway.igw ]
 }
 
-resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.k8s.id
-  cidr_block        = var.privnet_cidr
-  availability_zone = data.aws_availability_zones.available.names[1]
+resource "aws_subnet" "zone1" {
+  vpc_id                  = aws_vpc.k8s.id
+  cidr_block              = var.zone1_cidr
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = true
 
   tags = {
-    Name            = var.privnet_name
+    Name                  = var.zone1_name
+  }
+}
+
+resource "aws_subnet" "zone2" {
+  vpc_id                  = aws_vpc.k8s.id
+  cidr_block              = var.zone2_cidr
+  availability_zone       = data.aws_availability_zones.available.names[2]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name                  = var.zone2_name
   }
 }
 
 data "aws_subnet_ids" "k8s" {
   vpc_id = aws_vpc.k8s.id
 
-  # yes, this is bad, but the subnets don't exist yet
-  depends_on = [ aws_subnet.public, aws_subnet.private]
+  depends_on = [ aws_subnet.zone0, aws_subnet.zone1, aws_subnet.zone2 ]
 }
 # data.aws_subnet_ids.k8s.ids lists region's default subnet ids
 
 // ================================================== NAT GATEWAY
+#resource "aws_eip" "k8s" {
+#  vpc = true
+#}
+#
+#resource "aws_nat_gateway" "priv" {
+#  allocation_id = aws_eip.k8s.id
+#  subnet_id     = aws_subnet.private.id
+#
+#  tags = {
+#    Name        = "gw NAT"
+#    "Terraform" = "true"
+#  }
+#}
 
-resource "aws_eip" "k8s" {
-  vpc = true
-}
-
-resource "aws_nat_gateway" "priv" {
-  allocation_id = aws_eip.k8s.id
-  subnet_id     = aws_subnet.private.id
+// ================================================== INTERNET GATEWAY
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.k8s.id
 
   tags = {
-    Name        = "gw NAT"
+    Name        = "k8s-pub-igw"
     "Terraform" = "true"
   }
 }
 
-// ================================================== ROUTES + ASSOCIATIONS
 
-resource "aws_route_table" "public" {
+// ================================================== ROUTES + AZ ASSOCIATIONS
+resource "aws_route_table" "igw" {
   vpc_id       = aws_vpc.k8s.id
 
   route {
@@ -78,19 +101,33 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name        = "k8s-pubnet"
+    Name        = "k8s-igw"
     "Terraform" = "true"
-
   }
 }
 
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
+resource "aws_route_table_association" "zone0" {
+  subnet_id      = aws_subnet.zone0.id
+  route_table_id = aws_route_table.igw.id
+  
+  depends_on = [ aws_subnet.zone0 ]
+}
+
+resource "aws_route_table_association" "zone1" {
+  subnet_id      = aws_subnet.zone1.id
+  route_table_id = aws_route_table.igw.id
+  
+  depends_on = [ aws_subnet.zone1 ]
+}
+
+resource "aws_route_table_association" "zone2" {
+  subnet_id      = aws_subnet.zone2.id
+  route_table_id = aws_route_table.igw.id
+  
+  depends_on = [ aws_subnet.zone2 ]
 }
 
 // ================================================== SECURITY GROUPS
-
 resource "aws_security_group" "net_sg" {
   name        = "${var.env_name}_sg"
   description = "Allow ssh,icmp,https inbound, all outbound"
@@ -194,16 +231,6 @@ resource "aws_security_group" "net_sg" {
   tags = {
     "Name"      : "${var.env_name}-sg"
     "Terraform" : "true"
-  }
-}
-
-// ================================================== INTERNET GATEWAY
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.k8s.id
-
-  tags = {
-    Name        = "k8s-pub-igw"
-    "Terraform" = "true"
   }
 }
 

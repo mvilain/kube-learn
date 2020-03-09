@@ -67,3 +67,12 @@ gcloud compute ssh controller-0
 ## login into servers 
 
 ssh -i "./k8s-key.pem" centos@<IP-ADDRESS>
+
+## PACKER
+
+```
+packer build \
+    -var 'aws_access_key=YOUR ACCESS KEY' \
+    -var 'aws_secret_key=YOUR SECRET KEY' \
+    example.json
+```
