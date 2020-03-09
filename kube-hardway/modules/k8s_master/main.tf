@@ -35,6 +35,7 @@ resource "aws_elb" "web" {
 
 // ================================================== AUTOSCALING
 # https://github.com/cloudposse/terraform-aws-ec2-autoscale-group
+# https://binx.io/blog/2019/09/02/how-to-dynamically-bind-elastic-ip-addresses-to-an-auto-scaling-group/
 resource "aws_autoscaling_group" "k8s" {
   name                 = "${var.env_name}-k8s-asg"
   desired_capacity     = var.desired_capacity
