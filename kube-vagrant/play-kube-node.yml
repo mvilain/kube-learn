@@ -118,7 +118,7 @@
       owner: root
       group: root
     register: mas_com_10
-  - debug: var=mas_com_10
+#  - debug: var=mas_com_10
 
 #################################################################
 

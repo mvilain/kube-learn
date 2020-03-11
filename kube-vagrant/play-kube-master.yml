@@ -119,7 +119,7 @@
       owner: root
       group: root
     register: mas_com_10
-  - debug: var=mas_com_10
+#  - debug: var=mas_com_10
 
 #################################################################
 
@@ -203,11 +203,12 @@
       - apiserver-kubelet-client.crt
       - apiserver-kubelet-client.key
 
-  - name: MAS.11-fetching calico config
-    copy: 
-      src: calico.yaml
-      dest: calico.yaml
+#  - name: MAS.11-fetching calico config
+#    copy: 
+#      src: calico.yaml
+#      dest: calico.yaml
 
+  # https://docs.projectcalico.org/getting-started/kubernetes/quickstart
   - name: MAS.12-Install calico pod network
     become: false
     command: kubectl create -f https://docs.projectcalico.org/manifests/calico.yaml
