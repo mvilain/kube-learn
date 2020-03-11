@@ -11,8 +11,8 @@
         - node_ip is defined
       msg: node_ip must be defined in calling this playbook
 
-  - name: COM.1-Install packages that allow apt to be used over HTTPS
-    apt:
+  - name: COM.1-Install packages that allow installs over HTTPS
+    package:
       name: "{{ packages }}"
       state: present
       update_cache: yes
@@ -83,7 +83,6 @@
       group: docker
     register: mas_com_6
 #  - debug: var=mas_com_6.stdout_lines
-
 
   - name: COM.7-Remove swapfile from /etc/fstab
     mount:

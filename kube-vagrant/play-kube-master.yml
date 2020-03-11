@@ -12,8 +12,8 @@
         - node_ip is defined
       msg: node_ip must be defined in calling this playbook
 
-  - name: COM.1-Install packages that allow apt to be used over HTTPS
-    apt:
+  - name: COM.1-Install packages that allow installs over HTTPS
+    package:
       name: "{{ packages }}"
       state: present
       update_cache: yes
@@ -84,7 +84,6 @@
       group: docker
     register: mas_com_6
 #  - debug: var=mas_com_6.stdout_lines
-
 
   - name: COM.7-Remove swapfile from /etc/fstab
     mount:
@@ -167,7 +166,7 @@
       daemon_reload: yes
       state: restarted
 
-  - name: MAS.7-Initialize the Kubernetes cluster using kubeadm (this will take a moment)
+  - name: MAS.7-Initialize the Kubernetes cluster using kubeadm (this will take a while)
     command: kubeadm init 
         --apiserver-advertise-address="192.168.50.10" 
         --apiserver-cert-extra-sans="192.168.50.10"  
@@ -211,7 +210,14 @@
 
   - name: MAS.12-Install calico pod network
     become: false
-    command: kubectl create -f calico.yaml
+    command: kubectl create -f https://docs.projectcalico.org/manifests/calico.yaml
+    register: mas_13
+  - debug: var=mas_13.stdout_lines
+
+#  - name: MAS.13-Install dashboard
+#    become: false
+#    command: kubectl apply -f 
+#      https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc5/aio/deploy/recommended.yaml
 
   - name: MAS.13-Generate join command
     command: kubeadm token create --print-join-command
