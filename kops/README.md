@@ -4,7 +4,7 @@ git@github.com:kubernetes/kops.git
 
 https://groups.google.com/forum/#!topic/kubernetes-users/9ix65M13NNA
 ---
-Ravi 	
+Ravi
 11/28/16
 
 I am trying to install k8s on AWS. There are three different methods listed to install.
@@ -15,7 +15,7 @@ installing with kops http://kubernetes.io/docs/getting-started-guides/kops/
 installing on aws https://kubernetes.io/docs/setup/production-environment/turnkey/aws/
 
 ---
-Justin Garrison 	
+Justin Garrison
 11/28/16
 I'm surprised you only found 3 ways. I don't think there is a comparison page but here is a really quick breakdown from my limited knowledge of each tool. *disclaimer* I've only ever used kube-up
 
@@ -28,7 +28,7 @@ kube-up: The first deployment script. (https://get.k8s.io) Uses a lot of bash + 
 There are many more install options. But I'd probably recommend using kops in AWS or kubeadm for on-prem.
 
 ---
-Ravi 	
+Ravi
 12/6/16
 Re: [kubernetes-users] Re: Too many ways to install, which one to pick?
 
@@ -54,4 +54,3 @@ influxdb, elastic search etc on it?
 - show quoted text -
 
 >     <http://kubernetes.io/docs/getting-started-guides/aws/>
->

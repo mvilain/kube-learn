@@ -104,12 +104,15 @@
 
   - name: COM.9-Create calico nodename for node stats
     file:
-      name: /var/lib/calico
+      name: "{{ item }}"
       state: directory
       recurse: yes
       owner: root
       group: root
     register: mas_com_9
+    with_items:
+      - /datadir
+      - /var/lib/calico
 #  - debug: var=mas_com_9
 
   - name: COM.10-Create calico nodename for node stats

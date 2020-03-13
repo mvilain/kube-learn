@@ -3,37 +3,58 @@
 IMAGE_NAME = "bento/ubuntu-16.04"
 N = 3
 
+$script = <<-'SCRIPT'
+  apt-get update -y
+  apt-get upgrade -y
+  mkdir -pv /datadir
+SCRIPT
+
+## Install vagrant-disksize to allow resizing the vagrant box disk.
+
+## https://github.com/kusnier/vagrant-persistent-storage
+# unless Vagrant.has_plugin?("vagrant-persistent-storage")
+#     raise  Vagrant::Errors::VagrantError.new, "vagrant-persistent-storage plugin is missing. Please install it using 'sudo vagrant plugin install vagrant-persistent-storage' and rerun 'vagrant up'"
+# end
+
+# use datadir for storage on local volumes
+
 Vagrant.configure("2") do |config|
-    config.ssh.insert_key = false
+  config.ssh.insert_key = false
+#  config.disksize.size = '64GB'
+  config.vm.provision "shell", inline: $script
 
-    config.vm.provider "virtualbox" do |v|
-        v.memory = 1024
-        v.cpus = 2
-    end
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 2
+  end
       
-    config.vm.define "master" do |master|
-        master.vm.box = IMAGE_NAME
-        master.vm.network "private_network", ip: "192.168.50.10"
-        master.vm.hostname = "k8s-master"
-        master.vm.provision "ansible" do |ansible|
-            ansible.playbook = "play-kube-master.yml"
-            ansible.extra_vars = {
-                node_ip: "192.168.50.10",
-            }
-        end
-    end
+  config.vm.define "master" do |master|
+    master.vm.box = IMAGE_NAME
+    master.vm.network "private_network", ip: "192.168.50.10"
+    master.vm.hostname = "k8s-master"
 
-    (1..N).each do |i|
-        config.vm.define "node-#{i}" do |node|
-            node.vm.box = IMAGE_NAME
-            node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
-            node.vm.hostname = "node-#{i}"
-            node.vm.provision "ansible" do |ansible|
-                ansible.playbook = "play-kube-node.yml"
-                ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10}",
-                }
-            end
-        end
+    master.vm.provision "ansible" do |ansible|
+      ansible.compatibility_mode = "2.0"
+      ansible.playbook = "play-kube-master.yml"
+      ansible.extra_vars = {
+          node_ip: "192.168.50.10",
+      }
     end
+  end
+
+  (1..N).each do |i|
+    config.vm.define "node-#{i}" do |node|
+      node.vm.box = IMAGE_NAME
+      node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
+      node.vm.hostname = "node-#{i}"
+
+      node.vm.provision "ansible" do |ansible|
+        ansible.compatibility_mode = "2.0"
+        ansible.playbook = "play-kube-node.yml"
+        ansible.extra_vars = {
+          node_ip: "192.168.50.#{i + 10}",
+        }
+      end
+    end
+  end
 end
