@@ -1,15 +1,18 @@
+file_root = File.dirname(File.expand_path(__FILE__))
+file_to_disk = File.realpath( file_root ).to_s + "/disk.vmdk"
+
 Vagrant.configure(2) do |config|
 
   config.vm.box = "bento/ubuntu-16.04"
   config.vm.box_check_update = false
-  config.vm.network "private_network", ip: "192.168.33.9"
+  config.vm.network "private_network", ip: "192.168.16.4"
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
     vb.memory = "1024"
 
-    file_to_disk = File.realpath( "." ).to_s + "/disk.vdi"
 
-    if ARGV[0] == "up" && ! File.exist?(file_to_disk)
+
+     if ARGV[0] == "up" && ! File.exist?(file_to_disk)
        vb.customize [
             'createmedium', 'disk',
             '--filename', file_to_disk,
@@ -28,7 +31,6 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  # Two partition in one disk
   config.vm.provision "shell", inline: <<-SHELL
 set -e
 set -x
@@ -39,27 +41,13 @@ then
    exit 0
 fi
 
-
-sudo fdisk -u /dev/sdb <<EOF
-n
-p
-1
-
-+500M
-n
-p
-2
-
-
-w
-EOF
+sudo parted -s /dev/sdb mklabel gpt
+sudo parted -s /dev/sdb mkpart ext3 0 100%
 
 mkfs.ext4 /dev/sdb1
-mkfs.ext4 /dev/sdb2
-mkdir -p /{datadir,extra}
+mkdir -p /datadir
 mount -t ext4 /dev/sdb1 /datadir
-mount -t ext4 /dev/sdb2 /extra
-
+echo "/dev/sdb1 /datadir ext4 defaults 0 0" >> /etc/fstab
 date > /etc/provision_env_disk_added_date
   SHELL
 

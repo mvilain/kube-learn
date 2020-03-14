@@ -25,12 +25,35 @@ end
 
 part of bootstrap.sh
 ```
-parted /dev/sdb mklabel msdos
-parted /dev/sdb mkpart primary 512 100%
-mkfs.xfs /dev/sdb1
-mkdir /mnt/disk
-echo `blkid /dev/sdb1 | awk '{print$2}' | sed -e 's/"//g'` /mnt/disk   xfs   noatime,nobarrier   0   0 >> /etc/fstab
-mount /mnt/disk
+set -e
+set -x
+
+if [ -f /etc/provision_env_disk_added_date ]
+then
+   echo "Provision runtime already done."
+   exit 0
+fi
+
+
+sudo fdisk -u /dev/sdb <<EOF
+n
+p
+1
+
++500M
+n
+p
+2
+
+
+w
+EOF
+
+mkfs.ext4 /dev/sdb1
+mkfs.ext4 /dev/sdb2
+mkdir -p /{data,extra}
+mount -t ext4 /dev/sdb1 /data
+mount -t ext4 /dev/sdb2 /extra
 ```
 
 `vagrant plugin install vagrant-persistent-storage`
