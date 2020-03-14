@@ -12,11 +12,19 @@
         - node_ip is defined
       msg: node_ip must be defined in calling this playbook
 
-  - name: COM.1-Install packages that allow installs over HTTPS
+  - name: COM.1-Update apt-get repo and cache
+    apt: 
+      update_cache: yes 
+      force_apt_get: yes 
+      cache_valid_time: 3600
+    register: mas_com_1
+  - debug: var=mas_com_1.stdout_lines
+
+  - name: COM.2-Install packages that allow installs over HTTPS
     package:
       name: "{{ packages }}"
       state: present
-      update_cache: yes
+      update_cache: no
     vars:
       packages:
       - apt-transport-https
@@ -24,24 +32,24 @@
       - curl
       - gnupg-agent
       - software-properties-common
-    register: mas_com_1
-#  - debug: var=mas_com_1.stdout_lines
-
-  - name: COM.2-Add an apt signing key for Docker
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      state: present
     register: mas_com_2
 #  - debug: var=mas_com_2.stdout_lines
 
-  - name: COM.3-Add apt repository for stable version
-    apt_repository:
-      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+  - name: COM.3-Add an apt signing key for Docker
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
       state: present
     register: mas_com_3
 #  - debug: var=mas_com_3.stdout_lines
 
-  - name: COM.4-Install docker and its dependecies
+  - name: COM.4-Add apt repository for stable version
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      state: present
+    register: mas_com_4
+#  - debug: var=mas_com_4.stdout_lines
+
+  - name: COM.5-Install docker and its dependecies
     apt: 
       name: "{{ packages }}"
       state: present
@@ -52,11 +60,11 @@
       - containerd.io
     notify:
       - docker status
-    register: mas_com_4
-  - debug: var=mas_com_4.stdout_lines
+    register: mas_com_5
+  - debug: var=mas_com_5.stdout_lines
 
   # https://github.com/kubernetes/kubeadm/issues/1394
-  - name: COM.5-set docker to use systemd driver
+  - name: COM.6-set docker to use systemd driver
     copy: 
       dest: /etc/docker/daemon.json
       content: |
@@ -75,17 +83,17 @@
       mode: "0644"
     notify:
       - docker status
-    register: mas_com_5
-#  - debug: var=mas_com_5
+    register: mas_com_6
+#  - debug: var=mas_com_6
 
-  - name: COM.6-Add vagrant user to docker group
+  - name: COM.7-Add vagrant user to docker group
     user:
       name: vagrant
       group: docker
-    register: mas_com_6
-#  - debug: var=mas_com_6.stdout_lines
+    register: mas_com_7
+#  - debug: var=mas_com_7.stdout_lines
 
-  - name: COM.7-Remove swapfile from /etc/fstab
+  - name: COM.8-Remove swapfile from /etc/fstab
     mount:
       name: "{{ item }}"
       fstype: swap
@@ -93,36 +101,36 @@
     with_items:
       - swap
 #      - none
-    register: mas_com_7
-#  - debug: var=mas_com_7.stdout_lines
-
-  - name: COM.8-Disable swap
-    command: swapoff -a
-    when: ansible_swaptotal_mb > 0
     register: mas_com_8
 #  - debug: var=mas_com_8.stdout_lines
 
-  - name: COM.9-Create calico nodename for node stats
+  - name: COM.9-Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+    register: mas_com_9
+#  - debug: var=mas_com_9.stdout_lines
+
+  - name: COM.10-Create calico nodename for node stats
     file:
       name: "{{ item }}"
       state: directory
       recurse: yes
       owner: root
       group: root
-    register: mas_com_9
+    register: mas_com_10
     with_items:
       - /datadir
       - /var/lib/calico
-#  - debug: var=mas_com_9
+#  - debug: var=mas_com_10
 
-  - name: COM.10-Create calico nodename for node stats
+  - name: COM.11-Create calico nodename for node stats
     file:
       name: /var/lib/calico/nodename
       state: touch
       owner: root
       group: root
-    register: mas_com_10
-#  - debug: var=mas_com_10
+    register: mas_com_11
+#  - debug: var=mas_com_11
 
 #################################################################
 

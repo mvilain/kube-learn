@@ -9,19 +9,12 @@ $script = <<-'SCRIPT'
   mkdir -pv /datadir
 SCRIPT
 
-## Install vagrant-disksize to allow resizing the vagrant box disk.
-
-## https://github.com/kusnier/vagrant-persistent-storage
-# unless Vagrant.has_plugin?("vagrant-persistent-storage")
-#     raise  Vagrant::Errors::VagrantError.new, "vagrant-persistent-storage plugin is missing. Please install it using 'sudo vagrant plugin install vagrant-persistent-storage' and rerun 'vagrant up'"
-# end
 
 # use datadir for storage on local volumes
 
 Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
-#  config.disksize.size = '64GB'
-  config.vm.provision "shell", inline: $script
+#   config.vm.provision "shell", inline: $script
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
