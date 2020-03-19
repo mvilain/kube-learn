@@ -2,7 +2,6 @@
 join-command
 ca.*
 apiserver-kubelet-client*
-*.vmdk
 
 # Local .terraform directories
 **/.terraform/*

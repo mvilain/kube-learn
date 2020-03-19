@@ -221,17 +221,25 @@
 
   # https://github.com/kubernetes/dashboard#kubernetes-dashboard
   # uses apply so it can be run idempotently
-#  - name: MAS.12-installing dashboard add-on
-#    become: false
-#    command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
-#    register: mas_12
-#  - debug: var=mas_12.stdout_lines
+  - name: MAS.12-installing dashboard add-on
+    become: false
+    command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+    register: mas_12
+  - debug: var=mas_12.stdout_lines
 
-  - name: MAS.13-Generate join command
+  # https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner
+  # uses apply so it can be run idempotently
+  - name: MAS.13-installing storage-local-static add-on
+    become: false
+    command: kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/sig-storage-local-static-provisioner/master/helm/generated_examples/baremetal-namespace.yaml
+    register: mas_13
+  - debug: var=mas_13.stdout_lines
+
+  - name: MAS.14-Generate join command
     command: kubeadm token create --print-join-command
     register: join_command
 
-  - name: MAS.14-Copy join command to local file
+  - name: MAS.15-Copy join command to local file
     local_action: copy 
       content="{{ join_command.stdout_lines[0] }}"
       dest="./join-command"
