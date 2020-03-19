@@ -17,7 +17,7 @@
       force_apt_get: yes 
       cache_valid_time: 3600
     register: mas_com_1
-  - debug: var=mas_com_1.stdout_lines
+  - debug: var=mas_com_1
 
   - name: COM.2-Install packages that allow installs over HTTPS
     package:
@@ -99,7 +99,7 @@
       state: absent
     with_items:
       - swap
-#      - none
+
     register: mas_com_8
 #  - debug: var=mas_com_8.stdout_lines
 
@@ -118,7 +118,6 @@
       group: root
     register: mas_com_10
     with_items:
-      - /datadir
       - /var/lib/calico
 #  - debug: var=mas_com_10
 
@@ -128,8 +127,8 @@
       state: touch
       owner: root
       group: root
-    register: mas_com_11
-#  - debug: var=mas_com_11
+    register: com_11
+#  - debug: var=com_11
 
 #################################################################
 
@@ -164,10 +163,25 @@
       dest: /tmp/join-command.sh 
       mode: 0777
 
-  - name: NOD.5-Join the node to cluster
+  - name: NODE.5-Join the node to cluster
     command: sh /tmp/join-command.sh
+    args:
+      creates: /etc/kubernetes/pki/ca.crt
     register: node_5
   - debug: var=node_5.stdout_lines
+
+#  - name: NODE.6-clone csi-driver-host-path add-on
+#    git:
+#      repo: https://github.com/kubernetes-csi/csi-driver-host-path.git
+#      dest: /home/vagrant/csi-driver-host-path
+#    register: node_6
+#  - debug: var=node_6
+
+#  - name: NODE.7-install csi-driver-host-path driver
+#    command: /home/vagrant/csi-driver-host-path/deploy/kubernetes-1.17/deploy-hostpath.sh
+#    register: node_7
+#  - debug: var=node_7.stdout_lines
+
 
 
   handlers:

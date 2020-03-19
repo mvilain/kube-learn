@@ -18,7 +18,7 @@
       force_apt_get: yes 
       cache_valid_time: 3600
     register: mas_com_1
-  - debug: var=mas_com_1.stdout_lines
+  - debug: var=mas_com_1
 
   - name: COM.2-Install packages that allow installs over HTTPS
     package:
@@ -100,7 +100,6 @@
       state: absent
     with_items:
       - swap
-#      - none
     register: mas_com_8
 #  - debug: var=mas_com_8.stdout_lines
 
@@ -119,7 +118,6 @@
       group: root
     register: mas_com_10
     with_items:
-      - /datadir
       - /var/lib/calico
 #  - debug: var=mas_com_10
 
@@ -129,8 +127,8 @@
       state: touch
       owner: root
       group: root
-    register: mas_com_11
-#  - debug: var=mas_com_11
+    register: com_11
+#  - debug: var=com_11
 
 #################################################################
 
@@ -214,22 +212,20 @@
       - apiserver-kubelet-client.crt
       - apiserver-kubelet-client.key
 
-#  - name: MAS.11-fetching calico config
-#    copy: 
-#      src: calico.yaml
-#      dest: calico.yaml
-
   # https://docs.projectcalico.org/getting-started/kubernetes/quickstart
-  - name: MAS.12-Install calico pod network
+  - name: MAS.11-Install calico pod network
     become: false
-    command: kubectl create -f https://docs.projectcalico.org/manifests/calico.yaml
-    register: mas_13
-  - debug: var=mas_13.stdout_lines
+    command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+    register: mas_11
+  - debug: var=mas_11.stdout_lines
 
-#  - name: MAS.13-Install dashboard
+  # https://github.com/kubernetes/dashboard#kubernetes-dashboard
+  # uses apply so it can be run idempotently
+#  - name: MAS.12-installing dashboard add-on
 #    become: false
-#    command: kubectl apply -f 
-#      https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc5/aio/deploy/recommended.yaml
+#    command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+#    register: mas_12
+#  - debug: var=mas_12.stdout_lines
 
   - name: MAS.13-Generate join command
     command: kubeadm token create --print-join-command

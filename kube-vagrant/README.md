@@ -21,6 +21,9 @@ The
 ## TO DO
 
 - Doesn't have container volume plugin. Can't run pods that requests storage.
+
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+
 - runs a daemonset and all pods are created so long as they don't require persistant storage
 
 
@@ -38,4 +41,30 @@ end
 ...
 config.disksize.size = '50GB'
 ```
+
+- https://github.com/kusnier/vagrant-persistent-storage
+
+```
+vagrant plugin install vagrant-persistent-storage
+
+# Install persistant storage to allow resizing the vagrant box disk.
+unless Vagrant.has_plugin?("vagrant-persistent-storage")
+    raise  Vagrant::Errors::VagrantError.new, "vagrant-persistent-storage plugin is missing. Please install it using 'vagrant plugin install vagrant-persistent-storage' and rerun 'vagrant up'"
+end
+
+```
+
+- https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner/blob/master/helm/README.md
+
+```
+$ git clone --depth=1 https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner.git
+$ helm template -f <path-to-your-values-file> <release-name> --namespace <namespace> ./helm/provisioner > local-volume-provisioner.generated.yaml
+# edit local-volume-provisioner.generated.yaml if necessary
+$ kubectl create -f local-volume-provisioner.generated.yaml
+
+e.g.
+
+helm install -f helm/examples/baremetal.yaml local-volume-provisioner --namespace kube-system ./helm/provisioner
+```
+
 

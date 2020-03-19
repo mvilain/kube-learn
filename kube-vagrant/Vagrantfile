@@ -1,30 +1,62 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+
+$script = <<-EOFSCRIPT
+  set -e
+  set -x
+
+  if [ -f /etc/provision_env_disk_added_date ]
+  then
+     echo "Provision sdb already done."
+     exit 0
+  fi
+
+  sudo parted -s /dev/sdb mklabel gpt
+  sudo parted -s /dev/sdb mkpart ext3 0 100%
+
+  mkfs.ext4 /dev/sdb1
+  mkdir -p /datadir
+  mount -t ext4 /dev/sdb1 /datadir
+  echo "/dev/sdb1 /datadir ext4 defaults 0 0" >> /etc/fstab
+  date > /etc/provision_env_disk_added_date
+EOFSCRIPT
+
 IMAGE_NAME = "bento/ubuntu-16.04"
 N = 3
 
-$script = <<-'SCRIPT'
-  apt-get update -y
-  apt-get upgrade -y
-  mkdir -pv /datadir
-SCRIPT
+# Install persistant storage to allow resizing the vagrant box disk
+# https://github.com/kusnier/vagrant-persistent-storage
+unless Vagrant.has_plugin?("vagrant-persistent-storage")
+  raise  Vagrant::Errors::VagrantError.new, 
+  "vagrant-persistent-storage plugin is missing. Please install it using \n\n" +
+  "'sudo vagrant plugin install vagrant-persistent-storage' \n\n" + 
+  "and rerun 'vagrant up'"
+end
 
-
-# use datadir for storage on local volumes
+#------------------------------------------------------------
 
 Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
-#   config.vm.provision "shell", inline: $script
 
-  config.vm.provider "virtualbox" do |v|
-    v.memory = 1024
-    v.cpus = 2
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = 1024
+    vb.cpus = 2
+    vb.gui = false
   end
       
   config.vm.define "master" do |master|
     master.vm.box = IMAGE_NAME
     master.vm.network "private_network", ip: "192.168.50.10"
     master.vm.hostname = "k8s-master"
+    
+    master.persistent_storage.enabled = true
+    master.persistent_storage.use_lvm = false
+    #master.persistent_storage.partition = false
+    master.persistent_storage.location = "./master-hdd.vmdk"
+    master.persistent_storage.size = 32 * 1024
+    master.persistent_storage.mountname = 'datadir'
+    master.persistent_storage.filesystem = 'ext4'
+    master.persistent_storage.mountpoint = '/mnt/disks/sdb1'
 
     master.vm.provision "ansible" do |ansible|
       ansible.compatibility_mode = "2.0"
@@ -41,6 +73,16 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
       node.vm.hostname = "node-#{i}"
 
+      node.persistent_storage.enabled = true
+      node.persistent_storage.use_lvm = false
+      #node.persistent_storage.partition = false
+      node.persistent_storage.location = "./node-#{i}-hdd.vmdk"
+      node.persistent_storage.size = 32 * 1024
+      node.persistent_storage.mountname = 'datadir'
+      node.persistent_storage.filesystem = 'ext4'
+      node.persistent_storage.mountpoint = '/mnt/disks/sdb1'
+
+#     config.vm.provision "shell", inline: $script
       node.vm.provision "ansible" do |ansible|
         ansible.compatibility_mode = "2.0"
         ansible.playbook = "play-kube-node.yml"
