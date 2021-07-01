@@ -5,7 +5,18 @@
 https://docs.flatcar-linux.org/os/booting-with-iso/
 https://docs.flatcar-linux.org/os/quickstart/
 
-- increased RAM to 4048MB
+[6/30/2021 latest release is 2765.2.6](https://stable.release.flatcar-linux.net/amd64-usr/current/)
+
+https://kinvolk.io/docs/flatcar-container-linux/latest/installing/cloud/aws-ec2/
+
+https://stable.release.flatcar-linux.net/amd64-usr/2765.2.6/flatcar-container.tar.gz
+https://stable.release.flatcar-linux.net/amd64-usr/2765.2.6/flatcar_production_iso_image.iso
+
+https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_iso_image.iso
+
+https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_vagrant_virtualbox.box
+
+- increased RAM to 4096MB
 
 ```
 Type:        Other-64
@@ -15,7 +26,7 @@ Legacy BIOS: YES
 sdb:         32GB
 ```
 
-says it's "Flatcar Container Linux by Kinvolk stable (2303.4.0)"
+says it's "Flatcar Container Linux by Kinvolk stable (2765.2.6)"
 
 https://docs.flatcar-linux.org/os/installing-to-disk/
 
